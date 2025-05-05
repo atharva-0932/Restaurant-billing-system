@@ -1,0 +1,167 @@
+from tkinter import *
+import mysql.connector
+
+con = mysql.connector.connect(host = 'localhost',user = 'root', password = 'pass1234')
+cur = con.cursor()
+try:
+    cur.execute("use reg")
+except:
+    cur.execute("create database reg")
+    cur.execute("use reg")    
+
+    
+    
+def submit():
+    total_bill_paid = submitbill.get()
+
+    # Calculate pending amount
+    try:
+        bill_amount = float(submitbill.get())
+        total_cost = float(total_bill.get().split()[1])  # Extract total cost from total_bill string
+        pending_amount = total_cost - bill_amount
+        pending_amt.set(f"Rs. {pending_amount:.2f}")
+    except ValueError:
+        pending_amt.set("Invalid input")
+
+
+    cur.execute(f"INSERT INTO billing(total_bill_amt,total_bill_paid, pending_amt) VALUES ('{total_cost}','{total_bill_paid}', '{pending_amount}')")
+    con.commit()
+    
+def reset():
+    # Clears all the entry fields
+    upma.delete(0, END)
+    milk.delete(0, END)
+    tea.delete(0, END)
+    coffee.delete(0, END)
+    milkshake.delete(0, END)
+    pizza.delete(0, END)
+    pasta.delete(0, END)
+    total_bill.set("")
+    pending_amt.set("")
+
+def total():
+    # Get values from entries and handle non-integer inputs
+    try:
+        a1 = int(upma_var.get())
+    except ValueError:
+        a1 = 0
+    try:
+        a2 = int(milk_var.get())
+    except ValueError:
+        a2 = 0
+    try:
+        a3 = int(tea_var.get())
+    except ValueError:
+        a3 = 0
+    try:
+        a4 = int(coffee_var.get())
+    except ValueError:
+        a4 = 0
+    try:
+        a5 = int(milkshake_var.get())
+    except ValueError:
+        a5 = 0
+    try:
+        a6 = int(nachos_var.get())
+    except ValueError:
+        a6 = 0
+    try:
+        a7 = int(pasta_var.get())
+    except ValueError:
+        a7 = 0
+
+    # Calculate total cost
+    total_cost = (60 * a1 + 15 * a2 + 15 * a3 + 20 * a4 + 100 * a5 + 170 * a6 + 90 * a7)
+    total_bill.set(f"Rs. {total_cost:.2f}")
+    
+
+
+
+    # Insert the sale record into the database
+
+root = Tk()
+root.geometry("1200x500")
+root.title("Bill Management")
+root.resizable(False, False)
+
+# Variable definitions
+upma_var = StringVar()
+milk_var = StringVar()
+tea_var = StringVar()
+coffee_var = StringVar()
+milkshake_var = StringVar()
+nachos_var = StringVar()
+pasta_var = StringVar()
+total_bill = StringVar()
+submitbill = StringVar()
+pending_amt = StringVar()
+
+
+# Menu frame
+menu_frame = Frame(root, bg="lightyellow", highlightbackground="black", highlightthickness=1, width=350, height=370)
+menu_frame.place(x=10, y=118)
+Label(menu_frame, text="Menu", font=("Gabriola", 40, "bold"), fg="black", bg="lightyellow").place(x=80, y=0)
+
+Label(menu_frame, text="Upma..........Rs.60/plate", font=("Times", 18, 'bold'), fg="black", bg="lightyellow").place(x=10, y=100)
+Label(menu_frame, text="Milk...........Rs.15/cup", font=("Times", 18, 'bold'), fg="black", bg="lightyellow").place(x=10, y=130)
+Label(menu_frame, text="Tea.............Rs.15/cup", font=("Times", 18, 'bold'), fg="black", bg="lightyellow").place(x=10, y=160)
+Label(menu_frame, text="Coffee...........Rs.20/cup", font=("Times", 18, 'bold'), fg="black", bg="lightyellow").place(x=10, y=190)
+Label(menu_frame, text="Milkshake........Rs.100/glass", font=("Times", 18, 'bold'), fg="black", bg="lightyellow").place(x=10, y=220)
+Label(menu_frame, text="Nachos...........Rs.170/plate", font=("Times", 18, 'bold'), fg="black", bg="lightyellow").place(x=10, y=250)
+Label(menu_frame, text="Pasta............Rs.90/plate", font=("Times", 18, 'bold'), fg="black", bg="lightyellow").place(x=10, y=280)
+
+# Bill frame
+bill_frame = Frame(root, bg="lightpink", highlightbackground="black", highlightthickness=1, width=300, height=370)
+bill_frame.place(x=880, y=118)
+Label(bill_frame, text="Bill", font=("Times", 20,'bold'), bg="lightpink").place(x=120, y=10)
+entry_total = Entry(bill_frame, font=("Times", 20, 'bold'), textvariable=total_bill, bd=6, width=15, bg="lightyellow")
+entry_total.place(x=20, y=50)
+
+Label(bill_frame, text="Enter Bill", font=("Times", 20,'bold'), bg="lightpink").place(x=80, y=100)
+billamt = Entry(bill_frame, font=("Times", 20, 'bold'), textvariable=submitbill, bd=6, width=15, bg="lightyellow")
+billamt.place(x=20, y=150)
+
+Button(bill_frame, text="SUBMIT", command=submit, bd=5, fg="black", bg="lightblue", font=("Times", 16, 'bold'), width=9).place(x=90,y=200)
+
+Label(bill_frame, text="Pending Amount", font=("Times", 20,'bold'), bg="lightpink").place(x=30, y=250)
+pending_entry = Entry(bill_frame, font=("Times", 20, 'bold'), textvariable=pending_amt, bd=6, width=15, bg="lightyellow",state="readonly")
+pending_entry.place(x=20, y=300)
+
+# Entry work
+entry_frame = Frame(root, bd=5, height=370, width=300, relief=RAISED)
+entry_frame.pack()
+
+Label(entry_frame, text="Upma", font=("Times", 20, 'bold'), width=12, fg="blue4").grid(row=1, column=0)
+upma = Entry(entry_frame, font=("Times", 20, 'bold'), textvariable=upma_var, bd=6, width=8, bg="lightpink")
+upma.grid(row=1, column=1)
+
+Label(entry_frame, text="Milk", font=("Times", 20, 'bold'), width=12, fg="blue4").grid(row=2, column=0)
+milk = Entry(entry_frame, font=("Times", 20, 'bold'), textvariable=milk_var, bd=6, width=8, bg="lightpink")
+milk.grid(row=2, column=1)
+
+Label(entry_frame, text="Tea", font=("Times", 20, 'bold'), width=12, fg="blue4").grid(row=3, column=0)
+tea = Entry(entry_frame, font=("Times", 20, 'bold'), textvariable=tea_var, bd=6, width=8, bg="lightpink")
+tea.grid(row=3, column=1)
+
+Label(entry_frame, text="Coffee", font=("Times", 20, 'bold'), width=12, fg="blue4").grid(row=4, column=0)
+coffee = Entry(entry_frame, font=("Times", 20, 'bold'), textvariable=coffee_var, bd=6, width=8, bg="lightpink")
+coffee.grid(row=4, column=1)
+
+Label(entry_frame, text="Milkshake", font=("Times", 20, 'bold'), width=12, fg="blue4").grid(row=5, column=0)
+milkshake = Entry(entry_frame, font=("Times", 20, 'bold'), textvariable=milkshake_var, bd=6, width=8, bg="lightpink")
+milkshake.grid(row=5, column=1)
+
+Label(entry_frame, text="Nachos", font=("Times", 20, 'bold'), width=12, fg="blue4").grid(row=6, column=0)
+nachos = Entry(entry_frame, font=("Times", 20, 'bold'), textvariable=nachos_var, bd=6, width=8, bg="lightpink")
+nachos.grid(row=6, column=1)
+
+Label(entry_frame, text="Pasta", font=("Times", 20, 'bold'), width=12, fg="blue4").grid(row=7, column=0)
+pasta = Entry(entry_frame, font=("Times", 20, 'bold'), textvariable=pasta_var, bd=6, width=8, bg="lightpink")
+pasta.grid(row=7, column=1)
+
+# Buttons
+Button(entry_frame, text="RESET", command=reset, bd=5, fg="black", bg="lightblue", font=("Times", 16, 'bold'), width=9).grid(row=9, column=0)
+Button(entry_frame, text="TOTAL", command=total, bd=5, fg="black", bg="lightblue", font=("Times", 16, 'bold'), width=9).grid(row=9, column=1)
+
+
+root.mainloop()
